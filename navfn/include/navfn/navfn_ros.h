@@ -45,7 +45,7 @@
 #include <nav_msgs/Path.h>
 #include <tf/transform_datatypes.h>
 #include <vector>
-#include <nav_core/base_global_planner.h>
+#include <move_base_flex_core/global_planner.h>
 #include <nav_msgs/GetPlan.h>
 #include <navfn/potarr_point.h>
 #include <pcl_ros/publisher.h>
@@ -55,7 +55,7 @@ namespace navfn {
    * @class NavfnROS
    * @brief Provides a ROS wrapper for the navfn planner which runs a fast, interpolated navigation function on a costmap.
    */
-  class NavfnROS : public nav_core::BaseGlobalPlanner {
+  class NavfnROS : public move_base_flex_core::GlobalPlanner {
     public:
       /**
        * @brief  Default constructor for the NavFnROS object
@@ -112,6 +112,12 @@ namespace navfn {
        */
       bool makePlan(const geometry_msgs::PoseStamped& start, 
           const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan);
+
+      uint32_t makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
+                        const std::vector<geometry_msgs::PoseStamped>& waypoints,
+                        double goal_tolerance, const std::vector<double>& waypoints_tolerance,
+                        std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
+                        std::string& message);
 
       /**
        * @brief  Computes the full navigation function for the map given a point in the world to start from
