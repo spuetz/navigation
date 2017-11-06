@@ -49,11 +49,12 @@
 
 #include <base_local_planner/goal_functions.h>
 #include <nav_msgs/Path.h>
+#include <move_base_flex_msgs/ExePathAction.h>
 
 
 
 //register this planner as a BaseLocalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, nav_core::BaseLocalPlanner)
+PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, move_base_flex_core::LocalPlanner)
 
 namespace base_local_planner {
 
@@ -369,23 +370,23 @@ namespace base_local_planner {
     return true;
   }
 
-  bool TrajectoryPlannerROS::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
+  uint32_t TrajectoryPlannerROS::computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message){
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
-      return false;
+      return move_base_flex_msgs::ExePathResult::NOT_INITIALIZED;
     }
 
     std::vector<geometry_msgs::PoseStamped> local_plan;
     tf::Stamped<tf::Pose> global_pose;
     if (!costmap_ros_->getRobotPose(global_pose)) {
-      return false;
+      return move_base_flex_msgs::ExePathResult::TF_ERROR;
     }
 
     std::vector<geometry_msgs::PoseStamped> transformed_plan;
     //get the global plan in our frame
     if (!transformGlobalPlan(*tf_, global_plan_, global_pose, *costmap_, global_frame_, transformed_plan)) {
       ROS_WARN("Could not transform the global plan to the frame of the controller");
-      return false;
+      return move_base_flex_msgs::ExePathResult::INVALID_PATH;
     }
 
     //now we'll prune the plan based on the position of the robot
@@ -406,7 +407,7 @@ namespace base_local_planner {
 
     //if the global plan passed in is empty... we won't do anything
     if(transformed_plan.empty())
-      return false;
+      return move_base_flex_msgs::ExePathResult::INVALID_PATH;
 
     tf::Stamped<tf::Pose> goal_point;
     tf::poseStampedMsgToTF(transformed_plan.back(), goal_point);
@@ -431,9 +432,9 @@ namespace base_local_planner {
       //check to see if the goal orientation has been reached
       if (fabs(angle) <= yaw_goal_tolerance_) {
         //set the velocity command to zero
-        cmd_vel.linear.x = 0.0;
-        cmd_vel.linear.y = 0.0;
-        cmd_vel.angular.z = 0.0;
+        cmd_vel.twist.linear.x = 0.0;
+        cmd_vel.twist.linear.y = 0.0;
+        cmd_vel.twist.angular.z = 0.0;
         rotating_to_goal_ = false;
         xy_tolerance_latch_ = false;
         reached_goal_ = true;
@@ -450,16 +451,16 @@ namespace base_local_planner {
 
         //if we're not stopped yet... we want to stop... taking into account the acceleration limits of the robot
         if ( ! rotating_to_goal_ && !base_local_planner::stopped(base_odom, rot_stopped_velocity_, trans_stopped_velocity_)) {
-          if ( ! stopWithAccLimits(global_pose, robot_vel, cmd_vel)) {
-            return false;
+          if ( ! stopWithAccLimits(global_pose, robot_vel, cmd_vel.twist)) {
+            return move_base_flex_msgs::ExePathResult::NO_VALID_CMD;
           }
         }
         //if we're stopped... then we want to rotate to goal
         else{
           //set this so that we know its OK to be moving
           rotating_to_goal_ = true;
-          if(!rotateToGoal(global_pose, robot_vel, goal_th, cmd_vel)) {
-            return false;
+          if(!rotateToGoal(global_pose, robot_vel, goal_th, cmd_vel.twist)) {
+            return move_base_flex_msgs::ExePathResult::NO_VALID_CMD;
           }
         }
       }
@@ -469,7 +470,7 @@ namespace base_local_planner {
       publishPlan(local_plan, l_plan_pub_);
 
       //we don't actually want to run the controller when we're just rotating to goal
-      return true;
+      return move_base_flex_msgs::ExePathResult::SUCCESS;
     }
 
     tc_->updatePlan(transformed_plan);
@@ -487,9 +488,9 @@ namespace base_local_planner {
     */
 
     //pass along drive commands
-    cmd_vel.linear.x = drive_cmds.getOrigin().getX();
-    cmd_vel.linear.y = drive_cmds.getOrigin().getY();
-    cmd_vel.angular.z = tf::getYaw(drive_cmds.getRotation());
+    cmd_vel.twist.linear.x = drive_cmds.getOrigin().getX();
+    cmd_vel.twist.linear.y = drive_cmds.getOrigin().getY();
+    cmd_vel.twist.angular.z = tf::getYaw(drive_cmds.getRotation());
 
     //if we cannot move... tell someone
     if (path.cost_ < 0) {
@@ -502,7 +503,7 @@ namespace base_local_planner {
     }
 
     ROS_DEBUG_NAMED("trajectory_planner_ros", "A valid velocity command of (%.2f, %.2f, %.2f) was found for this cycle.",
-        cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z);
+        cmd_vel.twist.linear.x, cmd_vel.twist.linear.y, cmd_vel.twist.angular.z);
 
     // Fill out the local plan
     for (unsigned int i = 0; i < path.getPointsSize(); ++i) {

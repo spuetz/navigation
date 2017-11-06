@@ -65,7 +65,7 @@
 
 #include <angles/angles.h>
 
-#include <nav_core/base_local_planner.h>
+#include <move_base_flex_core/local_planner.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <base_local_planner/BaseLocalPlannerConfig.h>
@@ -77,7 +77,7 @@ namespace base_local_planner {
    * @class TrajectoryPlannerROS
    * @brief A ROS wrapper for the trajectory controller that queries the param server to construct a controller
    */
-  class TrajectoryPlannerROS : public nav_core::BaseLocalPlanner {
+  class TrajectoryPlannerROS : public move_base_flex_core::LocalPlanner {
     public:
       /**
        * @brief  Default constructor for the ros wrapper
@@ -114,7 +114,7 @@ namespace base_local_planner {
        * @param cmd_vel Will be filled with the velocity command to be passed to the robot base
        * @return True if a valid trajectory was found, false otherwise
        */
-      bool computeVelocityCommands(geometry_msgs::Twist& cmd_vel);
+      uint32_t computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message);
 
       /**
        * @brief  Set the plan that the controller is following

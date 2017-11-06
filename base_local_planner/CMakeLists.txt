@@ -9,7 +9,8 @@ find_package(catkin REQUIRED
             dynamic_reconfigure
             geometry_msgs
             message_generation
-            nav_core
+            move_base_flex_core
+            move_base_flex_msgs
             nav_msgs
             pcl_conversions
             pcl_ros
@@ -67,7 +68,8 @@ catkin_package(
         dynamic_reconfigure
         geometry_msgs
         message_runtime
-        nav_core
+        move_base_flex_core
+        move_base_flex_msgs
         nav_msgs
         pluginlib
         roscpp
