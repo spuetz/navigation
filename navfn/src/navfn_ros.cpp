@@ -39,12 +39,15 @@
 #include <tf/transform_listener.h>
 #include <costmap_2d/cost_values.h>
 #include <costmap_2d/costmap_2d.h>
-#include <move_base_flex_msgs/GetPathAction.h>
+#include <mbf_msgs/GetPathAction.h>
+#include <mbf_core/move_base_planner.h>
+#include <nav_core/base_global_planner.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 
 //register this planner as a BaseGlobalPlanner plugin
-PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, move_base_flex_core::GlobalPlanner)
+PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, mbf_core::MoveBasePlanner)
+PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, nav_core::BaseGlobalPlanner)
 
 namespace navfn {
 
@@ -206,21 +209,17 @@ namespace navfn {
       const geometry_msgs::PoseStamped& goal, double tolerance, std::vector<geometry_msgs::PoseStamped>& plan){
     double cost;
     std::string msg;
-    std::vector<geometry_msgs::PoseStamped> dummy1;
-    std::vector<double> dummy2;
-    return 10 > makePlan(start, goal, dummy1, default_tolerance_, dummy2, plan, cost, msg);
+    return 10 > makePlan(start, goal, default_tolerance_, plan, cost, msg);
   }
 
   uint32_t NavfnROS::makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal,
-                              const std::vector<geometry_msgs::PoseStamped>& waypoints,
-                              double goal_tolerance, const std::vector<double>& waypoints_tolerance,
-                              std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
+                              double goal_tolerance, std::vector<geometry_msgs::PoseStamped>& plan, double& cost,
                               std::string& message) {
     boost::mutex::scoped_lock lock(mutex_);
     if(!initialized_){
       message = "This planner has not been initialized yet, but it is being used, please call initialize() before use";
       ROS_ERROR("This planner has not been initialized yet, but it is being used, please call initialize() before use");
-      return move_base_flex_msgs::GetPathResult::NOT_INITIALIZED;
+      return mbf_msgs::GetPathResult::NOT_INITIALIZED;
     }
 
     //clear the plan, just in case
@@ -233,14 +232,14 @@ namespace navfn {
       message = "The goal pose passed to this planner must be in the planner's global frame";
       ROS_ERROR("The goal pose passed to this planner must be in the %s frame.  It is instead in the %s frame.", 
                 tf::resolve(tf_prefix_, global_frame_).c_str(), tf::resolve(tf_prefix_, goal.header.frame_id).c_str());
-      return move_base_flex_msgs::GetPathResult::INVALID_GOAL;
+      return mbf_msgs::GetPathResult::INVALID_GOAL;
     }
 
     if(tf::resolve(tf_prefix_, start.header.frame_id) != tf::resolve(tf_prefix_, global_frame_)){
       message = "The start pose passed to this planner must be in the planner's global frame";
       ROS_ERROR("The start pose passed to this planner must be in the %s frame.  It is instead in the %s frame.", 
                 tf::resolve(tf_prefix_, global_frame_).c_str(), tf::resolve(tf_prefix_, start.header.frame_id).c_str());
-      return move_base_flex_msgs::GetPathResult::INVALID_START;
+      return mbf_msgs::GetPathResult::INVALID_START;
     }
 
     double wx = start.pose.position.x;
@@ -250,7 +249,7 @@ namespace navfn {
     if(!costmap_->worldToMap(wx, wy, mx, my)){
       message = "The robot's start position is off the global costmap";
       ROS_WARN("The robot's start position is off the global costmap. Planning will always fail, are you sure the robot has been properly localized?");
-      return move_base_flex_msgs::GetPathResult::INVALID_START;
+      return mbf_msgs::GetPathResult::INVALID_START;
     }
 
     //clear the starting cell within the costmap because we know it can't be an obstacle
@@ -291,7 +290,7 @@ namespace navfn {
       if(goal_tolerance <= 0.0){
         message = "The goal sent to the navfn planner is off the global costmap";
         ROS_WARN_THROTTLE(1.0, "The goal sent to the navfn planner is off the global costmap. Planning will always fail to this goal.");
-        return move_base_flex_msgs::GetPathResult::INVALID_GOAL;
+        return mbf_msgs::GetPathResult::INVALID_GOAL;
       }
       mx = 0;
       my = 0;
@@ -377,10 +376,10 @@ namespace navfn {
 
     if (plan.empty()){
       message = "No plan found";
-      return move_base_flex_msgs::GetPathResult::NO_PATH_FOUND;
+      return mbf_msgs::GetPathResult::NO_PATH_FOUND;
     }
 
-    return move_base_flex_msgs::GetPathResult::SUCCESS;
+    return mbf_msgs::GetPathResult::SUCCESS;
   }
 
   void NavfnROS::publishPlan(const std::vector<geometry_msgs::PoseStamped>& path, double r, double g, double b, double a){

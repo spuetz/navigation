@@ -49,12 +49,13 @@
 
 #include <base_local_planner/goal_functions.h>
 #include <nav_msgs/Path.h>
-#include <move_base_flex_msgs/ExePathAction.h>
+#include <mbf_msgs/ExePathAction.h>
 
 
 
 //register this planner as a BaseLocalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, move_base_flex_core::LocalPlanner)
+PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, mbf_core::MoveBaseController)
+PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, nav_core::BaseLocalPlanner)
 
 namespace base_local_planner {
 
@@ -373,20 +374,20 @@ namespace base_local_planner {
   uint32_t TrajectoryPlannerROS::computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message){
     if (! isInitialized()) {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
-      return move_base_flex_msgs::ExePathResult::NOT_INITIALIZED;
+      return mbf_msgs::ExePathResult::NOT_INITIALIZED;
     }
 
     std::vector<geometry_msgs::PoseStamped> local_plan;
     tf::Stamped<tf::Pose> global_pose;
     if (!costmap_ros_->getRobotPose(global_pose)) {
-      return move_base_flex_msgs::ExePathResult::TF_ERROR;
+      return mbf_msgs::ExePathResult::TF_ERROR;
     }
 
     std::vector<geometry_msgs::PoseStamped> transformed_plan;
     //get the global plan in our frame
     if (!transformGlobalPlan(*tf_, global_plan_, global_pose, *costmap_, global_frame_, transformed_plan)) {
       ROS_WARN("Could not transform the global plan to the frame of the controller");
-      return move_base_flex_msgs::ExePathResult::INVALID_PATH;
+      return mbf_msgs::ExePathResult::INVALID_PATH;
     }
 
     //now we'll prune the plan based on the position of the robot
@@ -407,7 +408,7 @@ namespace base_local_planner {
 
     //if the global plan passed in is empty... we won't do anything
     if(transformed_plan.empty())
-      return move_base_flex_msgs::ExePathResult::INVALID_PATH;
+      return mbf_msgs::ExePathResult::INVALID_PATH;
 
     tf::Stamped<tf::Pose> goal_point;
     tf::poseStampedMsgToTF(transformed_plan.back(), goal_point);
@@ -452,7 +453,7 @@ namespace base_local_planner {
         //if we're not stopped yet... we want to stop... taking into account the acceleration limits of the robot
         if ( ! rotating_to_goal_ && !base_local_planner::stopped(base_odom, rot_stopped_velocity_, trans_stopped_velocity_)) {
           if ( ! stopWithAccLimits(global_pose, robot_vel, cmd_vel.twist)) {
-            return move_base_flex_msgs::ExePathResult::NO_VALID_CMD;
+            return mbf_msgs::ExePathResult::NO_VALID_CMD;
           }
         }
         //if we're stopped... then we want to rotate to goal
@@ -460,7 +461,7 @@ namespace base_local_planner {
           //set this so that we know its OK to be moving
           rotating_to_goal_ = true;
           if(!rotateToGoal(global_pose, robot_vel, goal_th, cmd_vel.twist)) {
-            return move_base_flex_msgs::ExePathResult::NO_VALID_CMD;
+            return mbf_msgs::ExePathResult::NO_VALID_CMD;
           }
         }
       }
@@ -470,7 +471,7 @@ namespace base_local_planner {
       publishPlan(local_plan, l_plan_pub_);
 
       //we don't actually want to run the controller when we're just rotating to goal
-      return move_base_flex_msgs::ExePathResult::SUCCESS;
+      return mbf_msgs::ExePathResult::SUCCESS;
     }
 
     tc_->updatePlan(transformed_plan);

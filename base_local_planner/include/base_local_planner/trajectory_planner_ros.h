@@ -65,7 +65,9 @@
 
 #include <angles/angles.h>
 
-#include <move_base_flex_core/local_planner.h>
+#include <nav_core/base_local_planner.h>
+#include <mbf_core/move_base_controller.h>
+#include <mbf_msgs/ExePathResult.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <base_local_planner/BaseLocalPlannerConfig.h>
@@ -77,7 +79,7 @@ namespace base_local_planner {
    * @class TrajectoryPlannerROS
    * @brief A ROS wrapper for the trajectory controller that queries the param server to construct a controller
    */
-  class TrajectoryPlannerROS : public move_base_flex_core::LocalPlanner {
+  class TrajectoryPlannerROS : public nav_core::BaseLocalPlanner, public mbf_core::MoveBaseController {
     public:
       /**
        * @brief  Default constructor for the ros wrapper
@@ -116,6 +118,14 @@ namespace base_local_planner {
        */
       uint32_t computeVelocityCommands(geometry_msgs::TwistStamped& cmd_vel, std::string& message);
 
+      bool computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
+        std::string message;
+        geometry_msgs::TwistStamped tmp_cmd_vel;
+        uint32_t ret = computeVelocityCommands(tmp_cmd_vel, message);
+        cmd_vel = tmp_cmd_vel.twist;
+        return ret == mbf_msgs::ExePathResult::SUCCESS ? true : false;
+      }
+
       /**
        * @brief  Set the plan that the controller is following
        * @param orig_global_plan The plan to pass to the controller
@@ -128,6 +138,14 @@ namespace base_local_planner {
        * @return True if achieved, false otherwise
        */
       bool isGoalReached();
+
+      bool isGoalReached(double dist_tolerance, double angle_tolerance){
+        return isGoalReached();
+      }
+
+      bool cancel(){
+        return false;
+      }
 
       /**
        * @brief  Generate and score a single trajectory

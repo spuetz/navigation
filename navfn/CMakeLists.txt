@@ -7,8 +7,8 @@ find_package(catkin REQUIRED
         costmap_2d
         geometry_msgs
         message_generation
-        move_base_flex_core
-        move_base_flex_msgs
+        mbf_core
+        mbf_msgs
         nav_msgs
         pcl_conversions
         pcl_ros
@@ -52,8 +52,8 @@ catkin_package(
     CATKIN_DEPENDS
         geometry_msgs
         message_runtime
-        move_base_flex_core
-        move_base_flex_msgs
+        mbf_core
+        mbf_msgs
         nav_msgs
         pluginlib
         roscpp
