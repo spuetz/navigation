@@ -40,13 +40,13 @@
 #include <costmap_2d/cost_values.h>
 #include <costmap_2d/costmap_2d.h>
 #include <mbf_msgs/GetPathAction.h>
-#include <mbf_core/move_base_planner.h>
+#include <mbf_costmap_core/costmap_planner.h>
 #include <nav_core/base_global_planner.h>
 
 #include <pcl_conversions/pcl_conversions.h>
 
 //register this planner as a BaseGlobalPlanner plugin
-PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, mbf_core::MoveBasePlanner)
+PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, mbf_costmap_core::MoveBasePlanner)
 PLUGINLIB_DECLARE_CLASS(navfn, NavfnROS, navfn::NavfnROS, nav_core::BaseGlobalPlanner)
 
 namespace navfn {

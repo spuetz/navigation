@@ -7,7 +7,7 @@ find_package(catkin REQUIRED
         costmap_2d
         geometry_msgs
         message_generation
-        mbf_core
+        mbf_costmap_core
         mbf_msgs
         nav_msgs
         pcl_conversions
@@ -52,7 +52,7 @@ catkin_package(
     CATKIN_DEPENDS
         geometry_msgs
         message_runtime
-        mbf_core
+        mbf_costmap_core
         mbf_msgs
         nav_msgs
         pluginlib

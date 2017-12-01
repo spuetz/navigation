@@ -54,7 +54,7 @@
 
 
 //register this planner as a BaseLocalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, mbf_core::MoveBaseController)
+PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, mbf_costmap_core::MoveBaseController)
 PLUGINLIB_EXPORT_CLASS(base_local_planner::TrajectoryPlannerROS, nav_core::BaseLocalPlanner)
 
 namespace base_local_planner {

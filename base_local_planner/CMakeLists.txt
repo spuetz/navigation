@@ -9,7 +9,7 @@ find_package(catkin REQUIRED
             dynamic_reconfigure
             geometry_msgs
             message_generation
-            mbf_core
+            mbf_costmap_core
             mbf_msgs
             nav_core
             nav_msgs
@@ -69,7 +69,7 @@ catkin_package(
         dynamic_reconfigure
         geometry_msgs
         message_runtime
-        mbf_core
+        mbf_costmap_core
         mbf_msgs
         nav_core
         nav_msgs

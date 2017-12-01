@@ -66,7 +66,7 @@
 #include <angles/angles.h>
 
 #include <nav_core/base_local_planner.h>
-#include <mbf_core/move_base_controller.h>
+#include <mbf_costmap_core/costmap_controller.h>
 #include <mbf_msgs/ExePathResult.h>
 
 #include <dynamic_reconfigure/server.h>
@@ -79,7 +79,7 @@ namespace base_local_planner {
    * @class TrajectoryPlannerROS
    * @brief A ROS wrapper for the trajectory controller that queries the param server to construct a controller
    */
-  class TrajectoryPlannerROS : public nav_core::BaseLocalPlanner, public mbf_core::MoveBaseController {
+  class TrajectoryPlannerROS : public nav_core::BaseLocalPlanner, public mbf_costmap_core::MoveBaseController {
     public:
       /**
        * @brief  Default constructor for the ros wrapper

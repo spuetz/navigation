@@ -46,7 +46,7 @@
 #include <tf/transform_datatypes.h>
 #include <vector>
 #include <nav_core/base_global_planner.h>
-#include <mbf_core/move_base_planner.h>
+#include <mbf_costmap_core/costmap_planner.h>
 #include <nav_msgs/GetPlan.h>
 #include <navfn/potarr_point.h>
 #include <pcl_ros/publisher.h>
@@ -56,7 +56,7 @@ namespace navfn {
    * @class NavfnROS
    * @brief Provides a ROS wrapper for the navfn planner which runs a fast, interpolated navigation function on a costmap.
    */
-  class NavfnROS : public nav_core::BaseGlobalPlanner, public mbf_core::MoveBasePlanner {
+  class NavfnROS : public nav_core::BaseGlobalPlanner, public mbf_costmap_core::MoveBasePlanner {
     public:
       /**
        * @brief  Default constructor for the NavFnROS object

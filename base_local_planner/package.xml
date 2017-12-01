@@ -3,7 +3,7 @@
     <version>1.14.2</version>
     <description>
 
-        This package provides implementations of the Trajectory Rollout and Dynamic Window approaches to local robot navigation on a plane. Given a plan to follow and a costmap, the controller produces velocity commands to send to a mobile base. This package supports both holonomic and non-holonomic robots, any robot footprint that can be represented as a convex polygon or circle, and exposes its configuration as ROS parameters that can be set in a launch file. This package's ROS wrapper adheres to the BaseLocalPlanner interface specified in the <a href="http://wiki.ros.org/mbf_core">mbf_core</a> package.
+        This package provides implementations of the Trajectory Rollout and Dynamic Window approaches to local robot navigation on a plane. Given a plan to follow and a costmap, the controller produces velocity commands to send to a mobile base. This package supports both holonomic and non-holonomic robots, any robot footprint that can be represented as a convex polygon or circle, and exposes its configuration as ROS parameters that can be set in a launch file. This package's ROS wrapper adheres to the BaseLocalPlanner interface specified in the <a href="http://wiki.ros.org/mbf_abstract_core">mbf_abstract_core</a> package.
 
     </description>
     <author>Eitan Marder-Eppstein</author>
@@ -27,7 +27,7 @@
     <build_depend>voxel_grid</build_depend>
     <build_depend>angles</build_depend>
     <build_depend>geometry_msgs</build_depend>
-    <build_depend>mbf_core</build_depend>
+    <build_depend>mbf_costmap_core</build_depend>
     <build_depend>mbf_msgs</build_depend>
     <build_depend>nav_core</build_depend>
     <build_depend>pcl_conversions</build_depend>
@@ -46,7 +46,7 @@
     <run_depend>voxel_grid</run_depend>
     <run_depend>angles</run_depend>
     <run_depend>geometry_msgs</run_depend>
-    <run_depend>mbf_core</run_depend>
+    <run_depend>mbf_costmap_core</run_depend>
     <run_depend>mbf_msgs</run_depend>
     <run_depend>nav_core</run_depend>
     <run_depend>pcl_ros</run_depend>
@@ -58,6 +58,6 @@
 
     <export>
         <nav_core plugin="${prefix}/blp_plugin.xml" />
-        <mbf_core plugin="${prefix}/blp_plugin.xml" />
+        <mbf_abstract_core plugin="${prefix}/blp_plugin.xml" />
     </export>
 </package>
